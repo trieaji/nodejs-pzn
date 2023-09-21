@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model customers {
+  id       Int        @id @default(autoincrement())
+  email    String     @db.VarChar(45)
+  nawa     String     @db.VarChar(45)
+  phone    String     @db.VarChar(45)
+  comments comments[]
+  likes    likes[] 
+  lovesBy products[] @relation("loves")
+  wallet   wallet?
+}
+
+model sample {
+  id      Int    @id @default(autoincrement())
+  jurusan String @db.VarChar(30)
+  description String @db.VarChar(35)
+}
+
+model examples {
+  id   Int    @id @default(autoincrement())
+  city String @db.VarChar(15)
+}
+
+model products {
+  id       Int     @id @default(autoincrement())
+  nawa     String  @db.VarChar(20)
+  price    Int
+  stock    Int
+  category String  @db.VarChar(20)
+  likes    likes[]
+  lovedBy customers[] @relation("loves")
+}
+
+model wallet {
+  id           Int       @id @default(autoincrement())
+  customers_id Int       @unique(map: "wallet_customer_id_unique")
+  balance      Int
+  customers    customers @relation(fields: [customers_id], references: [id], onDelete: Cascade, map: "wallet_customer_id_fk")
+}
+
+model comments {
+  id           Int       @id @default(autoincrement())
+  customers_id Int
+  title        String    @db.VarChar(50)
+  description  String?   @db.Text
+  customers    customers @relation(fields: [customers_id], references: [id], onDelete: Cascade, map: "comments_customer_id_fk")
+
+  @@index([customers_id], map: "comments_customer_id_fk")
+}
+
+model likes {
+  id           Int       @id @default(autoincrement())
+  customers_id Int
+  products_id  Int
+  customers    customers @relation(fields: [customers_id], references: [id], onDelete: Cascade, map: "likes_customer_id_fk")
+  products     products  @relation(fields: [products_id], references: [id], onDelete: Cascade, map: "likes_product_id_fk")
+
+  @@index([customers_id], map: "likes_customer_id_fk")
+  @@index([products_id], map: "likes_product_id_fk")
+}
+
+
